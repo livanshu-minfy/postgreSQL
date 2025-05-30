@@ -185,30 +185,7 @@ Variables
   \unset NAME            unset (delete) internal variable
 
 university_db=>
-university_db=>
-university_db=>
-university_db=>
-university_db=>
-university_db=>
-university_db=>
-university_db=>
-university_db=>
-university_db=>
-university_db=>
-university_db=>
-university_db=>
-university_db=>
-university_db=>
-university_db=>
-university_db=>
-university_db=>
-university_db=>
-university_db=>
-university_db=>
-university_db=>
-university_db=>
-university_db=>
-university_db=>
+
 university_db=>
 university_db=> CREATE TABLE students (
 university_db(>     student_id INTEGER,
@@ -456,3 +433,286 @@ UPDATE 1
 university_db=> UPDATE students SET dob = '2003-02-15' WHERE first_name = 'Charlie'
  AND last_name = 'Brown';
 UPDATE 1
+
+
+university_db=# SELECT * FROM students ORDER BY last_name ASC;
+ student_id | first_name | last_name |           email            |    dob
+------------+------------+-----------+----------------------------+------------
+          3 | Charlie    | Brown     | charlie.brown@example.com  | 2003-02-15
+          2 | Bob        | Johnson   | bob.johnson@example.com    | 2002-08-22
+          4 | Livanshu   | Saini     | livanshu.saini@example.com | 2003-10-12
+          5 | Konark     | Sharma    | konark.sharma@example.com  | 2003-11-14
+          1 | Alice      | Smith     | alices@example.net         | 2003-05-15
+(5 rows)
+
+
+university_db=# GRANT ALL PRIVILEGES ON DATABASE university_db TO livanshu;
+GRANT
+university_db=# SELECT * FROM students ORDER BY dob DESC LIMIT 3;
+ student_id | first_name | last_name |           email            |    dob
+------------+------------+-----------+----------------------------+------------
+          5 | Konark     | Sharma    | konark.sharma@example.com  | 2003-11-14
+          4 | Livanshu   | Saini     | livanshu.saini@example.com | 2003-10-12
+          1 | Alice      | Smith     | alices@example.net         | 2003-05-15
+(3 rows)
+
+
+university_db=# SELECT * from students ORDER BY dob ASC LIMIT 2;
+ student_id | first_name | last_name |           email           |    dob
+------------+------------+-----------+---------------------------+------------
+          2 | Bob        | Johnson   | bob.johnson@example.com   | 2002-08-22
+          3 | Charlie    | Brown     | charlie.brown@example.com | 2003-02-15
+(2 rows)
+
+
+university_db=# SELECT * FROM students ORDER BY student_id LIMIT 2 OFFSET 1;
+ student_id | first_name | last_name |           email           |    dob
+------------+------------+-----------+---------------------------+------------
+          2 | Bob        | Johnson   | bob.johnson@example.com   | 2002-08-22
+          3 | Charlie    | Brown     | charlie.brown@example.com | 2003-02-15
+(2 rows)
+
+
+university_db=# SELECT COUNT(*) AS total_students FROM students;
+ total_students
+----------------
+              5
+(1 row)
+
+
+university_db=# SELECT COUNT(*) AS total_students FROM students;
+ total_students
+----------------
+              5
+(1 row)
+
+
+university_db=# SELECT min(dob) AS minimum FROM students;
+  minimum
+------------
+ 2002-08-22
+(1 row)
+
+
+university_db=# SELECT (DISTINCT last_name) AS dln FROM students;
+ERROR:  syntax error at or near "DISTINCT"
+LINE 1: SELECT (DISTINCT last_name) AS dln FROM students;
+                ^
+university_db=# SELECT COUNT(DISTINCT last_name) AS dln FROM students;
+ dln
+-----
+   5
+(1 row)
+
+
+university_db=# DROP TABLE IF EXISTS students; -- Start fresh
+DROP TABLE
+university_db=#
+university_db=# CREATE TABLE students (
+university_db(#     student_id SERIAL PRIMARY KEY,  -- student_id is now PK, auto-incrementing, NOT NULL
+
+university_db(#     first_name VARCHAR(50) NOT NULL,
+university_db(#     last_name VARCHAR(50) NOT NULL,
+university_db(#     email VARCHAR(100) UNIQUE,      -- Email should be unique; can be NULL unless NOT NU
+LL is added
+university_db(#     dob DATE,
+university_db(#     enrollment_status VARCHAR(20) CHECK (enrollment_status IN ('enrolled', 'graduated',
+'dropped', 'pending'))
+university_db(# );
+CREATE TABLE
+university_db=#
+university_db=# -- Insert data (student_id will be auto-generated)
+university_db=# INSERT INTO students (first_name, last_name, email, dob, enrollment_status)
+university_db-# VALUES ('Alice', 'Smith', 'alice.smith@example.com', '2003-05-15', 'enrolled');
+INSERT 0 1
+university_db=# INSERT INTO students (first_name, last_name, email, dob, enrollment_status)
+university_db-# VALUES ('Robert', 'Johnson', 'robert.j@example.com', '2002-08-22', 'enrolled');
+INSERT 0 1
+university_db=# INSERT INTO students (first_name, last_name, email, dob, enrollment_status)
+university_db-# VALUES ('Charlie', 'Brown', 'charlie.brown@example.com', '2003-01-10', 'pending');
+INSERT 0 1
+university_db=#
+university_db=# SELECT * FROM students; -- Note the student_id values (1, 2, 3...)
+ student_id | first_name | last_name |           email           |    dob     | enrollment_status
+------------+------------+-----------+---------------------------+------------+-------------------
+          1 | Alice      | Smith     | alice.smith@example.com   | 2003-05-15 | enrolled
+          2 | Robert     | Johnson   | robert.j@example.com      | 2002-08-22 | enrolled
+          3 | Charlie    | Brown     | charlie.brown@example.com | 2003-01-10 | pending
+(3 rows)
+
+
+university_db=# CREATE TABLE courses (
+university_db(#     course_id SERIAL PRIMRY KEY,
+university_db(#     course_name VARCHAR(100) NOT NULL UNIQUE,
+university_db(#     credits INTEGER CHECK (credits > 0 AND credits < 10) -- Example of CHECK
+university_db(# );
+ERROR:  syntax error at or near "PRIMRY"
+LINE 2:     course_id SERIAL PRIMRY KEY,
+                             ^
+university_db=#
+university_db=# INSERT INTO courses (course_name, credits) VALUES ('Introduction to SQL', 3);
+ERROR:  relation "courses" does not exist
+LINE 1: INSERT INTO courses (course_name, credits) VALUES ('Introduc...
+                    ^
+university_db=# INSERT INTO courses (course_name, credits) VALUES ('Database Design', 4);
+ERROR:  relation "courses" does not exist
+LINE 1: INSERT INTO courses (course_name, credits) VALUES ('Database...
+                    ^
+university_db=# INSERT INTO courses (course_name, credits) VALUES ('Web Development', 3);
+ERROR:  relation "courses" does not exist
+LINE 1: INSERT INTO courses (course_name, credits) VALUES ('Web Deve...
+                    ^
+university_db=# INSERT INTO courses (course_name, credits) VALUES ('Data Structures', 4);
+ERROR:  relation "courses" does not exist
+LINE 1: INSERT INTO courses (course_name, credits) VALUES ('Data Str...
+                    ^
+university_db=# CREATE TABLE courses (
+university_db(#     course_id SERIAL PRIMRY KEY,
+university_db(#     course_name VARCHAR(100) NOT NULL UNIQUE,
+university_db(#     credits INTEGER CHECK (credits > 0 AND credits < 10) -- Example of CHECK
+university_db(# );
+ERROR:  syntax error at or near "PRIMRY"
+LINE 2:     course_id SERIAL PRIMRY KEY,
+                             ^
+university_db=#
+university_db=# INSERT INTO courses (course_name, credits) VALUES ('Introduction to SQL', 3);
+ERROR:  relation "courses" does not exist
+LINE 1: INSERT INTO courses (course_name, credits) VALUES ('Introduc...
+                    ^
+university_db=# INSERT INTO courses (course_name, credits) VALUES ('Database Design', 4);
+ERROR:  relation "courses" does not exist
+LINE 1: INSERT INTO courses (course_name, credits) VALUES ('Database...
+                    ^
+university_db=# INSERT INTO courses (course_name, credits) VALUES ('Web Development', 3);
+ERROR:  relation "courses" does not exist
+LINE 1: INSERT INTO courses (course_name, credits) VALUES ('Web Deve...
+                    ^
+university_db=# INSERT INTO courses (course_name, credits) VALUES ('Data Structures', 4);
+ERROR:  relation "courses" does not exist
+LINE 1: INSERT INTO courses (course_name, credits) VALUES ('Data Str...
+                    ^
+university_db=# CREATE TABLE courses (
+university_db(#     course_id SERIAL PRIMRY KEY,
+university_db(#     course_name VARCHAR(100) NOT NULL UNIQUE,
+university_db(#     credits INTEGER CHECK (credits > 0 AND credits < 10) -- Example of CHECK
+university_db(# );
+ERROR:  syntax error at or near "PRIMRY"
+LINE 2:     course_id SERIAL PRIMRY KEY,
+                             ^
+university_db=#
+university_db=# INSERT INTO courses (course_name, credits) VALUES ('Introduction to SQL', 3);
+ERROR:  relation "courses" does not exist
+LINE 1: INSERT INTO courses (course_name, credits) VALUES ('Introduc...
+                    ^
+university_db=# INSERT INTO courses (course_name, credits) VALUES ('Database Design', 4);
+ERROR:  relation "courses" does not exist
+LINE 1: INSERT INTO courses (course_name, credits) VALUES ('Database...
+                    ^
+university_db=# INSERT INTO courses (course_name, credits) VALUES ('Web Development', 3);
+ERROR:  relation "courses" does not exist
+LINE 1: INSERT INTO courses (course_name, credits) VALUES ('Web Deve...
+                    ^
+university_db=# INSERT INTO courses (course_name, credits) VALUES ('Data Structures', 4);
+ERROR:  relation "courses" does not exist
+LINE 1: INSERT INTO courses (course_name, credits) VALUES ('Data Str...
+                    ^
+university_db=# CREATE TABLE courses (
+university_db(#     course_id SERIAL PRIMRY KEY,
+university_db(#     course_name VARCHAR(100) NOT NULL UNIQUE,
+university_db(#     credits INTEGER CHECK (credits > 0 AND credits < 10) -- Example of CHECK
+university_db(# );
+ERROR:  syntax error at or near "PRIMRY"
+LINE 2:     course_id SERIAL PRIMRY KEY,
+                             ^
+university_db=#
+university_db=# INSERT INTO courses (course_name, credits) VALUES ('Introduction to SQL', 3);
+ERROR:  relation "courses" does not exist
+LINE 1: INSERT INTO courses (course_name, credits) VALUES ('Introduc...
+                    ^
+university_db=# INSERT INTO courses (course_name, credits) VALUES ('Database Design', 4);
+ERROR:  relation "courses" does not exist
+LINE 1: INSERT INTO courses (course_name, credits) VALUES ('Database...
+                    ^
+university_db=# INSERT INTO courses (course_name, credits) VALUES ('Web Development', 3);
+ERROR:  relation "courses" does not exist
+LINE 1: INSERT INTO courses (course_name, credits) VALUES ('Web Deve...
+                    ^
+university_db=# INSERT INTO courses (course_name, credits) VALUES ('Data Structures', 4);
+ERROR:  relation "courses" does not exist
+LINE 1: INSERT INTO courses (course_name, credits) VALUES ('Data Str...
+                    ^
+university_db=# CREATE TABLE cources{}
+university_db-# sva
+university_db-#
+university_db-# fa
+university_db-# df
+university_db-# daf
+university_db-# a
+university_db-# ga
+university_db-# g
+university_db-# ag
+university_db-# g
+university_db-# \q
+
+C:\Program Files\PostgreSQL\17\pgAdmin 4\runtime>"C:\Program Files\PostgreSQL\17\pgAdmin 4\runtime\psql.
+exe" "host=localhost port=5432 dbname=university_db user=postgres sslmode=prefer connect_timeout=10" 2>>
+&1
+psql (17.5)
+WARNING: Console code page (437) differs from Windows code page (1252)
+         8-bit characters might not work correctly. See psql reference
+         page "Notes for Windows users" for details.
+Type "help" for help.
+
+university_db=# CREATE TABLE courses (
+university_db(#     course_id SERIAL PRIMARY KEY,     course_name VARCHAR(100) NOT NULL UNIQUE,
+university_db(#     credits INTEGER CHECK (credits > 0 AND credits < 10) -- Example of CHECK
+university_db(# );
+CREATE TABLE
+university_db=#
+university_db=# INSERT INTO courses (course_name, credits) VALUES ('Introduction to SQL', 3);
+INSERT 0 1
+university_db=# INSERT INTO courses (course_name, credits) VALUES ('Database Design', 4);
+INSERT 0 1
+university_db=# INSERT INTO courses (course_name, credits) VALUES ('Web Development', 3);
+INSERT 0 1
+university_db=# INSERT INTO courses (course_name, credits) VALUES ('Data Structures', 4);
+INSERT 0 1
+university_db=# CREATE TABLE enrollments (
+university_db(#     enrollment_id SERIAL PRIMARY KEY,
+university_db(#     student_id INTEGER NOT NULL,
+university_db(#     course_id INTEGER NOT NULL,
+university_db(#     enrollment_date DATE DEFAULT CURRENT_DATE, -- Sets default if not specified
+university_db(#     grade CHAR(1) CHECK (grade IN ('A', 'B', 'C', 'D', 'F', 'W', NULL)), -- W for withdr
+aw, NULL if not graded
+university_db(#
+university_db(#     -- Foreign Key constraint for student_id
+university_db(#     CONSTRAINT fk_student
+university_db(#         FOREIGN KEY (student_id)
+university_db(#         REFERENCES students(student_id)
+university_db(#         ON DELETE CASCADE, -- If a student is deleted, their enrollments are also delete
+d.
+university_db(#                            -- Other options: ON DELETE RESTRICT, ON DELETE SET NULL, ON
+DELETE SET DEFAULT
+university_db(#
+university_db(#     -- Foreign Key constraint for course_id
+university_db(#     CONSTRAINT fk_course
+university_db(#         FOREIGN KEY (course_id)
+university_db(#         REFERENCES courses(course_id)
+university_db(#         ON DELETE RESTRICT, -- (Default if not specified) Prevent deleting a course if s
+tudents are enrolled.
+university_db(#
+university_db(#     -- Ensure a student cannot enroll in the same course multiple times (if semester isn
+'t a factor)
+university_db(#     UNIQUE (student_id, course_id)
+university_db(# );
+CREATE TABLE
+university_db=# INSERT INTO enrollments (student_id, course_id, grade) VALUES (1, 1, 'A');
+INSERT 0 1
+university_db=# INSERT INTO enrollments (student_id, course_id) VALUES (1, 2); -- Grade will be NULL
+INSERT 0 1
+university_db=# INSERT INTO enrollments (student_id, course_id, grade) VALUES (2, 1, 'B');
+INSERT 0 1
+university_db=# INSERT INTO enrollments (student_id, course_id, grade) VALUES (2, 1, 'B');
+ERROR:  duplicate key value violates unique constraint "enrollments_student_id_course_id_key"
+DETAIL:  Key (student_id, course_id)=(2, 1) already exists.
+university_db=#
